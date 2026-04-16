@@ -1,0 +1,20 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home),
+
+    path('api/add-user/', views.api_add_user),
+    path('api/users/', views.api_get_users),
+    path('api/login/', views.api_login),
+
+    path('api/save-skills/', views.save_user_skills),
+    path('api/user-skills/<int:user_id>/', views.get_user_skills),
+    path('api/match/<int:user_id>/', views.find_matches),
+
+    path('api/send-request/', views.send_request),
+    
+    path('api/requests/<int:user_id>/', views.get_requests),
+    path('api/accept-request/', views.accept_request),
+    path('api/reject-request/', views.reject_request),
+]
