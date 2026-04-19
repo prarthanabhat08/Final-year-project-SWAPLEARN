@@ -8,10 +8,9 @@ import {
 } from 'react-native';
 import Navbar from './Navbar';
 
-export default function ProfilePage({ user, ...props }) {
+export default function ProfilePage({ user, goToRequests, ...props }) {
   const [activeTab, setActiveTab] = useState('skills');
   const [skills, setSkills] = useState([]);
-
 
   const userData = user
     ? {
@@ -29,7 +28,6 @@ export default function ProfilePage({ user, ...props }) {
         taught: 0,
       };
 
-
   useEffect(() => {
     if (!user || !user.user_id) return;
 
@@ -42,10 +40,11 @@ export default function ProfilePage({ user, ...props }) {
   return (
     <ScrollView style={styles.container}>
 
-      <Navbar {...props} />
+      <Navbar {...props} currentPage="profile" />
 
       {/* HEADER */}
       <View style={styles.headerCard}>
+
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>👤</Text>
         </View>
@@ -90,7 +89,6 @@ export default function ProfilePage({ user, ...props }) {
   );
 }
 
-
 const Stat = ({ number, label }) => (
   <View style={styles.stat}>
     <Text style={styles.statNumber}>{number}</Text>
@@ -108,8 +106,6 @@ const Tab = ({ title, active, onPress }) => (
     </Text>
   </TouchableOpacity>
 );
-
-
 
 const SkillsSection = ({ skills }) => {
   const learn = skills.filter(s => s.type === "learn");
@@ -160,41 +156,72 @@ const Empty = ({ title }) => (
   </View>
 );
 
-/* STYLES (UNCHANGED) */
+/* STYLES */
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f4f0' },
-  headerCard: { backgroundColor: '#151a3c', padding: 25, alignItems: 'center' },
+
+  headerCard: { 
+    backgroundColor: '#151a3c', 
+    padding: 25, 
+    alignItems: 'center',
+    position: 'relative'   // ✅ important for bell positioning
+  },
+
   avatar: {
     width: 90, height: 90, borderRadius: 45,
     backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center'
   },
+
   avatarText: { fontSize: 30 },
+
   name: { color: '#fff', fontSize: 22, fontWeight: 'bold', marginTop: 10 },
+
   bio: { color: '#ccc', marginTop: 5 },
+
   stats: { flexDirection: 'row', gap: 30, marginTop: 15 },
+
   stat: { alignItems: 'center' },
+
   statNumber: { color: '#4CAF50', fontWeight: 'bold', fontSize: 15 },
+
   statLabel: { color: '#ccc', fontSize: 15 },
+
   actions: { flexDirection: 'row', gap: 15, marginTop: 15 },
+
   editBtn: { backgroundColor: '#4CAF50', paddingHorizontal: 75, paddingVertical: 10, borderRadius: 20 },
+
   shareBtn: { borderWidth: 1, borderColor: '#4CAF50', paddingHorizontal: 75, paddingVertical: 10, borderRadius: 20 },
+
   editText: { color: '#fff', fontWeight: 'bold' },
+
   shareText: { color: '#4CAF50', fontWeight: 'bold' },
+
   tabs: { flexDirection: 'row', justifyContent: 'center', marginTop: 15, gap: 10 },
+
   tab: { paddingVertical: 8, paddingHorizontal: 15, borderRadius: 20, backgroundColor: '#e0e0e0' },
+
   activeTab: { backgroundColor: '#4CAF50' },
+
   tabText: { color: '#555' },
+
   activeTabText: { color: '#fff' },
+
   section: { padding: 20 },
+
   sectionTitle: { fontWeight: 'bold', fontSize: 16, marginVertical: 10, color: '#151a3c' },
+
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+
   skillCard: {
     backgroundColor: '#fff', width: '30%', padding: 15,
     borderRadius: 12, marginBottom: 10, elevation: 3
   },
+
   skill: { fontWeight: 'bold', color: '#151a3c' },
+
   level: { color: '#4CAF50', marginTop: 5 },
+
   emptyBox: {
     backgroundColor: '#fff', padding: 20,
     borderRadius: 10, alignItems: 'center'
