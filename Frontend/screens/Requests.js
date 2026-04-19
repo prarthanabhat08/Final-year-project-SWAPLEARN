@@ -66,7 +66,7 @@ export default function Requests({ user, isLoggedIn, ...props }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Navbar isLoggedIn={isLoggedIn} {...props} />
+      <Navbar isLoggedIn={isLoggedIn} {...props} currentPage="requests" />
 
       <Text style={styles.title}>Requests</Text>
 
