@@ -27,16 +27,16 @@ export default function Home({
 
       {/* NAVBAR */}
      <Navbar
-  isLoggedIn={isLoggedIn}
-  goToLogin={goToLogin}
-  goToRegister={goToRegister}
-  goToHome={goToHome}
-  goToAbout={goToAbout}
-  goToDiscover={goToDiscover}
-  goToMatch={goToMatch}
-  goToMessages={goToMessages} 
-  goToProfile={goToProfile}
-  
+        isLoggedIn={isLoggedIn}
+        goToLogin={goToLogin}
+        goToRegister={goToRegister}
+        goToHome={goToHome}
+        goToAbout={goToAbout}
+        goToDiscover={goToDiscover}
+        goToMatch={goToMatch}
+        goToMessages={goToMessages} 
+        goToProfile={goToProfile}
+        currentPage="home"
 />
 
       {/* HERO SECTION */}
