@@ -89,7 +89,7 @@ export default function Messages(props) {
   return (
     <View style={styles.container}>
 
-      <Navbar {...props} />
+      <Navbar {...props} currentPage="messages" />
 
       {/* HEADER */}
       <Text style={styles.title}>Messages</Text>
