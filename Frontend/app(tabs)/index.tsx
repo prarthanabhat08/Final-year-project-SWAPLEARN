@@ -15,7 +15,7 @@ type UserType = {
 };
 
 export default function Index() {
-  const [screen, setScreen] = useState('home');
+  const [screen, setScreen] = useState<string>('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
 
@@ -62,7 +62,7 @@ export default function Index() {
         goToLogin={() => setScreen('login')}
         goToRegister={() => setScreen('register')}
         goToProfile={() => setScreen('profile')}
-        goToRequests={() => setScreen('requests')}  
+        goToRequests={() => setScreen('requests')}
       />
     );
   }
@@ -70,6 +70,7 @@ export default function Index() {
   if (screen === 'discover') {
     return (
       <Discover
+        user={user}
         isLoggedIn={isLoggedIn}
         goToHome={() => setScreen('home')}
         goToAbout={() => setScreen('about')}
@@ -78,7 +79,7 @@ export default function Index() {
         goToLogin={() => setScreen('login')}
         goToRegister={() => setScreen('register')}
         goToProfile={() => setScreen('profile')}
-        goToRequests={() => setScreen('requests')}  
+        goToRequests={() => setScreen('requests')}
       />
     );
   }
@@ -95,10 +96,11 @@ export default function Index() {
         goToLogin={() => setScreen('login')}
         goToRegister={() => setScreen('register')}
         goToProfile={() => setScreen('profile')}
-        goToRequests={() => setScreen('requests')} 
+        goToRequests={() => setScreen('requests')}
       />
     );
   }
+
 
   if (screen === 'profile') {
     return (
@@ -112,7 +114,7 @@ export default function Index() {
         goToLogin={() => setScreen('login')}
         goToRegister={() => setScreen('register')}
         goToProfile={() => setScreen('profile')}
-        goToRequests={() => setScreen('requests')}  
+        goToRequests={() => setScreen('requests')}
       />
     );
   }
@@ -129,7 +131,7 @@ export default function Index() {
         goToMessages={() => setScreen('messages')}
         goToLogin={() => setScreen('login')}
         goToRegister={() => setScreen('register')}
-        goToRequests={() => setScreen('requests')}  
+        goToRequests={() => setScreen('requests')}
       />
     );
   }
@@ -160,7 +162,7 @@ export default function Index() {
       goToMatch={() => setScreen('match')}
       goToMessages={() => setScreen('messages')}
       goToProfile={() => setScreen('profile')}
-      goToRequests={() => setScreen('requests')}  
+      goToRequests={() => setScreen('requests')}
     />
   );
 }
