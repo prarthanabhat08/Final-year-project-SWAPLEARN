@@ -11,7 +11,8 @@ export default function Navbar({
   goToMatch,
   goToProfile,
   goToMessages,
-  goToRequests,
+  goToRequests, 
+  currentPage,
 }) {
   return (
     <View style={styles.navbar}>
@@ -21,21 +22,13 @@ export default function Navbar({
         <Text style={styles.logo}>SwapLearn</Text>
       </TouchableOpacity>
 
-      {/* MENU */}
+      
       <View style={styles.menu}>
         <Text style={styles.link} onPress={goToHome}>Home</Text>
         <Text style={styles.link} onPress={goToAbout}>About</Text>
         <Text style={styles.link} onPress={goToDiscover}>Discover</Text>
         <Text style={styles.link} onPress={goToMatch}>Match</Text>
-
-        {/* ✅ NEW */}
-        {isLoggedIn && (
-          <Text style={styles.link} onPress={goToRequests}>
-            Requests
-          </Text>
-        )}
-
-        {/* EXISTING */}
+        
         {isLoggedIn && (
           <Text style={styles.link} onPress={goToMessages}>
             Messages
@@ -56,9 +49,19 @@ export default function Navbar({
             </TouchableOpacity>
           </>
         ) : (
-          <TouchableOpacity onPress={goToProfile}>
-            <Text style={styles.profile}>Profile</Text>
-          </TouchableOpacity>
+          <View style={styles.rightSection}>
+
+            {currentPage === 'profile' && (
+              <TouchableOpacity onPress={goToRequests}>
+                <Text style={{ fontSize: 18 }}>🔔</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity onPress={goToProfile}>
+              <Text style={styles.profile}>Profile</Text>
+            </TouchableOpacity>
+
+          </View>
         )}
       </View>
 
@@ -74,6 +77,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#151a3c',
     paddingHorizontal: 30,
     paddingVertical: 15,
+  },
+  rightSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
   },
 
   logo: {
