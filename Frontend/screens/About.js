@@ -12,7 +12,7 @@ export default function About(props) {
     <ScrollView style={styles.container}>
 
       {/* NAVBAR */}
-      <Navbar {...props} />
+      <Navbar {...props} currentPage="about" />
 
       {/* HERO */}
       <View style={styles.hero}>
