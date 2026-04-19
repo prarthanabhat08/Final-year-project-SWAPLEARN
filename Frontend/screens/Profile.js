@@ -40,7 +40,7 @@ export default function ProfilePage({ user, goToRequests, ...props }) {
   return (
     <ScrollView style={styles.container}>
 
-      <Navbar {...props} currentPage="profile" />
+      <Navbar {...props} currentPage="profile" goToRequests={goToRequests} />
 
       {/* HEADER */}
       <View style={styles.headerCard}>
