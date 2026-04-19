@@ -51,8 +51,12 @@ export default function Navbar({
         ) : (
           <View style={styles.rightSection}>
 
+            {/* ✅ SHOW ONLY ON PROFILE PAGE */}
             {currentPage === 'profile' && (
-              <TouchableOpacity onPress={goToRequests}>
+              <TouchableOpacity onPress={() => {
+                console.log("🔔 clicked", goToRequests);
+                goToRequests && goToRequests();
+              }}>
                 <Text style={{ fontSize: 18 }}>🔔</Text>
               </TouchableOpacity>
             )}
