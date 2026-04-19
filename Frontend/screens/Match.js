@@ -57,7 +57,7 @@ export default function Match({ user, isLoggedIn, ...props }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Navbar isLoggedIn={isLoggedIn} {...props} />
+      <Navbar isLoggedIn={isLoggedIn} {...props} currentPage="match" />
 
       <Text style={styles.title}>Best Matches</Text>
 
