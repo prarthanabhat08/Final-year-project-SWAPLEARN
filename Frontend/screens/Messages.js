@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,99 +10,159 @@ import {
 } from 'react-native';
 import Navbar from './Navbar';
 
-export default function Messages(props) {
+export default function Messages({ openChat, user, ...props }){
 
-  const activeUsers = [
-    { id: '1', name: 'Ananya' },
-    { id: '2', name: 'Rahul' },
-    { id: '3', name: 'Meera' },
-    { id: '4', name: 'Kiran' },
-    { id: '5', name: 'Asha' },
-  ];
+  const [chats, setChats] = useState([]);
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [search, setSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  console.log("USER IN MESSAGES:", user);
 
-  const chats = [
-    {
-      id: '1',
-      name: 'Ananya',
-      message: 'Let’s continue Python session tomorrow',
-      time: '10:45 AM',
-      unread: 2,
-      online: true,
-    },
-    {
-      id: '2',
-      name: 'Rahul',
-      message: 'Thanks for the React help!',
-      time: 'Yesterday',
-      unread: 0,
-      online: false,
-    },
-    {
-      id: '3',
-      name: 'Meera',
-      message: 'Can we reschedule?',
-      time: '2 days ago',
-      unread: 1,
-      online: true,
-    },
-  ];
+  /* ================= LOAD CHATS ================= */
+  const loadChats = async () => {
+    console.log("🔥 loadChats called");
 
-  /* ACTIVE USER BUBBLE */
+    if (!user) {
+      console.log("❌ user missing");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `http://192.168.1.4:8000/api/chats/${user.user_id}/`
+      );
+
+      console.log("STATUS:", res.status);
+
+      const data = await res.json();
+
+      console.log("DATA:", data);
+
+      if (Array.isArray(data)) {
+        setChats(data);
+        setActiveUsers(data);
+      }
+
+    } catch (err) {
+      console.log("ERROR:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadChats();
+
+    const interval = setInterval(loadChats, 3000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  /* ================= SEARCH ================= */
+  const searchUsers = async (text) => {
+    setSearch(text);
+
+    if (text.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `http://192.168.1.4:8000/api/search-users/?q=${text}&user_id=${props.user.user_id}`
+      );
+
+      const data = await res.json();
+      setSearchResults(data);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  /* ================= ACTIVE USERS ================= */
   const renderActiveUser = (user) => (
-    <View key={user.id} style={styles.activeUser}>
+    <View key={user.room_id} style={styles.activeUser}>
       <View style={styles.storyCircle}>
-        <Text style={styles.storyText}>{user.name.charAt(0)}</Text>
+        <Text style={styles.storyText}>
+          {user.name ? user.name.charAt(0) : "?"}
+        </Text>
       </View>
       <Text style={styles.activeName}>{user.name}</Text>
     </View>
   );
 
-  /* CHAT ITEM */
-  const renderChat = ({ item }) => (
-    <TouchableOpacity style={styles.chatCard}>
+  /* ================= CHAT ITEM ================= */
+  const renderChat = ({ item }) => {
 
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
-        {item.online && <View style={styles.onlineDot} />}
-      </View>
+    if (!item || !item.room_id) return null;
 
-      <View style={styles.chatInfo}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.message} numberOfLines={1}>
-          {item.message}
-        </Text>
-      </View>
+    return (
+      <TouchableOpacity
+        style={styles.chatCard}
+        onPress={() => {
+          console.log("CLICKED:", item);
+          openChat && openChat(item.room_id, item.name);
+        }}
+      >
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {item.name ? item.name.charAt(0) : "?"}
+          </Text>
+        </View>
 
-      <View style={styles.rightSection}>
-        <Text style={styles.time}>{item.time}</Text>
-
-        {item.unread > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadText}>{item.unread}</Text>
-          </View>
-        )}
-      </View>
-
-    </TouchableOpacity>
-  );
+        <View style={styles.chatInfo}>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.message}>
+            {item.last_message || "Start chatting..."}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
 
-      <Navbar {...props} currentPage="messages" />
+      <Navbar {...props} showMessages={true} />
 
-      {/* HEADER */}
       <Text style={styles.title}>Messages</Text>
 
-      {/* SEARCH BAR */}
+      {/* ================= SEARCH ================= */}
       <View style={styles.searchBox}>
         <TextInput
-          placeholder="Search"
+          placeholder="Search users..."
           style={styles.searchInput}
+          value={search}
+          onChangeText={searchUsers}
         />
       </View>
 
-      {/* ACTIVE USERS */}
+      {/* ================= SEARCH RESULTS ================= */}
+      {searchResults.length > 0 && (
+        <View style={{ paddingHorizontal: 15 }}>
+          {searchResults.map((item) => (
+            <View key={item.user_id} style={styles.chatCard}>
+
+              <Text style={styles.name}>{item.name}</Text>
+
+              {item.isAccepted ? (
+                <TouchableOpacity
+                  onPress={() =>
+                    openChat(item.room_id, item.name)
+                  }
+                >
+                  <Text style={{ color: 'green' }}>Start Chat</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={{ color: 'red' }}>
+                  Request not accepted
+                </Text>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* ================= ACTIVE USERS ================= */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -111,23 +171,31 @@ export default function Messages(props) {
         {activeUsers.map(renderActiveUser)}
       </ScrollView>
 
-      {/* CHAT LIST */}
-      <FlatList
-        data={chats}
-        keyExtractor={(item) => item.id}
-        renderItem={renderChat}
-        contentContainerStyle={{ padding: 15 }}
-      />
+      {/* ================= CHAT LIST ================= */}
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={chats}
+          keyExtractor={(item, index) =>
+            item.room_id ? item.room_id.toString() : index.toString()
+          }
+          renderItem={renderChat}
+          contentContainerStyle={{ padding: 15 }}
+
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", marginTop: 20 }}>
+              No chats found
+            </Text>
+          }
+        />
+      </View>
 
     </View>
   );
 }
 
+/* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f4f0',
-  },
+  container: { flex: 1, backgroundColor: '#f0f4f0' },
 
   title: {
     fontSize: 26,
@@ -137,7 +205,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  /* SEARCH */
   searchBox: {
     backgroundColor: '#e6e9ef',
     margin: 15,
@@ -145,14 +212,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 
-  searchInput: {
-    height: 40,
-  },
+  searchInput: { height: 40 },
 
-  /* ACTIVE USERS */
-  activeContainer: {
-    paddingLeft: 15,
-  },
+  activeContainer: { paddingLeft: 15 },
 
   activeUser: {
     alignItems: 'center',
@@ -168,17 +230,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  storyText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+  storyText: { color: '#fff', fontWeight: 'bold' },
 
-  activeName: {
-    fontSize: 12,
-    marginTop: 5,
-  },
+  activeName: { fontSize: 12, marginTop: 5 },
 
-  /* CHAT */
   chatCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -196,7 +251,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
   },
 
   avatarText: {
@@ -205,22 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  onlineDot: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: 'limegreen',
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-
-  chatInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
+  chatInfo: { flex: 1, marginLeft: 12 },
 
   name: {
     fontWeight: 'bold',
@@ -231,26 +270,5 @@ const styles = StyleSheet.create({
   message: {
     color: '#666',
     marginTop: 3,
-  },
-
-  rightSection: {
-    alignItems: 'flex-end',
-  },
-
-  time: {
-    fontSize: 12,
-    color: '#888',
-  },
-
-  unreadBadge: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    marginTop: 5,
-  },
-
-  unreadText: {
-    color: '#fff',
-    fontSize: 12,
   },
 });
