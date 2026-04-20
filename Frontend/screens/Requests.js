@@ -68,6 +68,13 @@ export default function Requests({ user, isLoggedIn, ...props }) {
     <ScrollView style={styles.container}>
       <Navbar isLoggedIn={isLoggedIn} {...props} currentPage="requests" />
 
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => props.setScreen(props.previousScreen)}
+      >
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Requests</Text>
 
       {!user ? (
@@ -116,6 +123,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f4f0',
+  },
+
+  backButton: {
+    position: 'absolute',
+    top: 65,
+    left: 20,
+    backgroundColor: '#3fad48',
+    padding: 8,
+    borderRadius: 10,
+    elevation: 3,
+  },
+
+  backText: {
+    fontSize: 12,
+    color: '#151a3c',
+    fontWeight: 'bold',
   },
 
   title: {
