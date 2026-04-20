@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import Navbar from './Navbar';
 
-export default function ProfilePage({ user, goToRequests, ...props }) {
+export default function ProfilePage({ user, goToRequests, handleLogout, ...props }) {
   const [activeTab, setActiveTab] = useState('skills');
   const [skills, setSkills] = useState([]);
 
@@ -45,6 +45,14 @@ export default function ProfilePage({ user, goToRequests, ...props }) {
       {/* HEADER */}
       <View style={styles.headerCard}>
 
+        {/* ✅ BACK BUTTON INSIDE BLUE */}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => props.setScreen(props.previousScreen)}
+        >
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>👤</Text>
         </View>
@@ -58,6 +66,7 @@ export default function ProfilePage({ user, goToRequests, ...props }) {
           <Stat number={userData.taught} label="Taught" />
         </View>
 
+        {/* ACTION BUTTONS */}
         <View style={styles.actions}>
           <TouchableOpacity style={styles.editBtn}>
             <Text style={styles.editText}>Edit</Text>
@@ -67,6 +76,11 @@ export default function ProfilePage({ user, goToRequests, ...props }) {
             <Text style={styles.shareText}>Share</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+
       </View>
 
       {/* TABS */}
@@ -165,7 +179,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#151a3c', 
     padding: 25, 
     alignItems: 'center',
-    position: 'relative'   // ✅ important for bell positioning
+  },
+
+  /* ✅ FINAL BACK BUTTON STYLE */
+  backButton: {
+    position: 'absolute',
+    top: 15,
+    left: 30,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+  },
+
+  backText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+
+  logoutText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 8,
+    fontWeight: 'bold',
   },
 
   avatar: {
