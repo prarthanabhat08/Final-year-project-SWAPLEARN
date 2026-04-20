@@ -57,10 +57,24 @@ export default function Match({ user, isLoggedIn, ...props }) {
 
   return (
     <ScrollView style={styles.container}>
+
+      {/* NAVBAR */}
       <Navbar isLoggedIn={isLoggedIn} {...props} currentPage="match" />
 
+      {/* BACK BUTTON */}
+      <View style={styles.hero}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => props.goToHome()}
+        >
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* TITLE */}
       <Text style={styles.title}>Best Matches</Text>
 
+      {/* CONTENT */}
       {!user ? (
         <Text style={styles.noMatch}>Login to see matches</Text>
       ) : matches.length === 0 ? (
@@ -91,14 +105,82 @@ export default function Match({ user, isLoggedIn, ...props }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0f4f0' },
-  title: { fontSize: 28, textAlign: 'center', margin: 20 },
-  noMatch: { textAlign: 'center', color: 'gray' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
-  card: { backgroundColor: '#fff', padding: 20, margin: 10, borderRadius: 10 },
-  username: { fontWeight: 'bold', fontSize: 18 },
-  tag: { marginTop: 5 },
-  tagAlt: { marginBottom: 10 },
-  connectBtn: { backgroundColor: '#151a3c', padding: 10, borderRadius: 10 },
-  connectText: { color: '#fff', textAlign: 'center' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#f0f4f0' 
+  },
+
+  /* BACK BUTTON */
+  hero: {
+    height: 50,
+    justifyContent: 'center',
+  },
+
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 20,
+    backgroundColor: '#3fad48',
+    padding: 8,
+    borderRadius: 10,
+    elevation: 3,
+  },
+
+  backText: {
+    fontSize: 12,
+    color: '#151a3c',
+    fontWeight: 'bold',
+  },
+
+  title: { 
+    fontSize: 28, 
+    textAlign: 'center', 
+    margin: 20,
+    color: '#151a3c',
+    fontWeight: 'bold'
+  },
+
+  noMatch: { 
+    textAlign: 'center', 
+    color: 'gray' 
+  },
+
+  grid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'center' 
+  },
+
+  card: { 
+    backgroundColor: '#fff', 
+    padding: 20, 
+    margin: 10, 
+    borderRadius: 10,
+    elevation: 4
+  },
+
+  username: { 
+    fontWeight: 'bold', 
+    fontSize: 18,
+    color: '#151a3c'
+  },
+
+  tag: { 
+    marginTop: 5 
+  },
+
+  tagAlt: { 
+    marginBottom: 10 
+  },
+
+  connectBtn: { 
+    backgroundColor: '#151a3c', 
+    padding: 10, 
+    borderRadius: 10 
+  },
+
+  connectText: { 
+    color: '#fff', 
+    textAlign: 'center' 
+  },
 });
