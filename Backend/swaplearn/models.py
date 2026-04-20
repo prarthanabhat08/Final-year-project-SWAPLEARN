@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # USERS
 class User(models.Model):
     user_id = models.AutoField(primary_key=True)
@@ -55,14 +56,20 @@ class Session(models.Model):
     session_time = models.DateTimeField()
     status = models.CharField(max_length=50)
 
+import uuid
+
+class ChatRoom(models.Model):
+    id = models.CharField(primary_key=True, max_length=100, default=uuid.uuid4, editable=False)
+    users = models.ManyToManyField(User)
+
 
 # MESSAGE
 class Message(models.Model):
     message_id = models.AutoField(primary_key=True)
-    skill_request = models.ForeignKey(SkillRequest, on_delete=models.CASCADE)
-    message_status = models.CharField(max_length=50)
-    time = models.DateTimeField()
-
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, null=True, blank=True)
+    text = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
 # REVIEW
 class Review(models.Model):
