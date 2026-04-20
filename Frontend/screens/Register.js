@@ -71,6 +71,7 @@ export default function Register({ switchToLogin, goBack }) {
         },
         body: JSON.stringify({
           name: name,
+          username: username,
           email: email,
           password: password,
         }),
