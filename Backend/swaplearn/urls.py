@@ -17,4 +17,10 @@ urlpatterns = [
     path('api/requests/<int:user_id>/', views.get_requests),
     path('api/accept-request/', views.accept_request),
     path('api/reject-request/', views.reject_request),
+    
+    path('api/discover/<int:user_id>/', views.discover_users),
+    path('api/chats/<int:user_id>/', views.get_chats),
 ]
+
+
+
