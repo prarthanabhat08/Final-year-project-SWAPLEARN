@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';   // ✅ added useState
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  TextInput,   // ✅ added TextInput
 } from 'react-native';
 import Navbar from './Navbar';
+
 export default function Home({
   isLoggedIn,
   goToLogin,
@@ -18,15 +20,17 @@ export default function Home({
   goToMessages,
   goToProfile,
   goToRequests, 
-  
 }) {
+
+  const [searchText, setSearchText] = useState(''); // ✅ added
+
   return (
 
-
-    <ScrollView style={styles.container}>
-
+    <ScrollView style={styles.container}
+      keyboardShouldPersistTaps="handled" 
+    >
       {/* NAVBAR */}
-     <Navbar
+      <Navbar
         isLoggedIn={isLoggedIn}
         goToLogin={goToLogin}
         goToRegister={goToRegister}
@@ -37,7 +41,16 @@ export default function Home({
         goToMessages={goToMessages} 
         goToProfile={goToProfile}
         currentPage="home"
-/>
+      />
+
+      <View style={styles.searchContainer}>
+        <TextInput
+          placeholder="Search here..."
+          value={searchText}
+          onChangeText={setSearchText}
+          style={styles.searchInput}
+        />
+      </View>
 
       {/* HERO SECTION */}
       <View style={styles.hero}>
@@ -49,14 +62,14 @@ export default function Home({
         </Text>
 
         <View style={styles.heroButtons}>
-  <TouchableOpacity style={styles.primaryBtn} onPress={goToDiscover}>
-    <Text style={styles.primaryText}>Discover</Text>
-  </TouchableOpacity>
+          <TouchableOpacity style={styles.primaryBtn} onPress={goToDiscover}>
+            <Text style={styles.primaryText}>Discover</Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity style={styles.secondaryBtn} onPress={goToMatch}>
-    <Text style={styles.secondaryText}>Match</Text>
-  </TouchableOpacity>
-</View>
+          <TouchableOpacity style={styles.secondaryBtn} onPress={goToMatch}>
+            <Text style={styles.secondaryText}>Match</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* FEATURES */}
@@ -74,40 +87,39 @@ export default function Home({
       </View>
 
       {/* LESSONS */}
- {/* LESSONS */}
-<Text style={styles.sectionTitle}>Available Lessons</Text>
+      <Text style={styles.sectionTitle}>Available Lessons</Text>
 
-<View style={styles.lessons}>
-  {[
-    { title: 'Python' },
-    { title: 'Dance' },
-    { title: 'Video Editing' },
-    {title: 'Digital marketing' },
-    {title: 'Content creation' },
-  ].map((item, index) => (
-    <View key={index} style={styles.lessonCard}>
-      <Text style={styles.lessonTitle}>{item.title}</Text>
-      <Text style={styles.lessonText}>
-        Learn something new and improve your skills.
-      </Text>
+      <View style={styles.lessons}>
+        {[
+          { title: 'Python' },
+          { title: 'Dance' },
+          { title: 'Video Editing' },
+          { title: 'Digital marketing' },
+          { title: 'Content creation' },
+        ].map((item, index) => (
+          <View key={index} style={styles.lessonCard}>
+            <Text style={styles.lessonTitle}>{item.title}</Text>
+            <Text style={styles.lessonText}>
+              Learn something new and improve your skills.
+            </Text>
 
-      <TouchableOpacity
-  style={styles.lessonBtn}
-  onPress={() => {
-    if (!isLoggedIn) {
-      goToLogin();   
-    } else {
-      alert('Request Sent!'); 
-    }
-  }}
->
-  <Text style={styles.lessonBtnText}>
-    {isLoggedIn ? 'Request' : 'Get Started'}
-  </Text>
-</TouchableOpacity>
-    </View>
-  ))}
-</View>
+            <TouchableOpacity
+              style={styles.lessonBtn}
+              onPress={() => {
+                if (!isLoggedIn) {
+                  goToLogin();   
+                } else {
+                  alert('Request Sent!'); 
+                }
+              }}
+            >
+              <Text style={styles.lessonBtnText}>
+                {isLoggedIn ? 'Request' : 'Get Started'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
 
       {/* FOOTER */}
       <View style={styles.footer}>
@@ -124,6 +136,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f4f0',
+  },
+
+
+  searchContainer: {
+    padding: 5,
+    alignItems: 'center',
+    marginBottom: -30,
+    marginVertical: 5,
+    zIndex: 10,
+    backgroundColor: '#f0f4f0',
+  },
+
+  searchInput: {
+    width: '40%',
+    backgroundColor: '#fff',
+    padding: 5,
+    borderRadius: 15,
+    borderWidth: 0.5,
+    borderColor: '#ccc',
   },
 
   /* HERO */
@@ -171,7 +202,7 @@ const styles = StyleSheet.create({
   },
 
   secondaryBtn: {
-    backgroundColor: '#4CAF50', // ✅ green
+    backgroundColor: '#4CAF50',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 25,
@@ -219,21 +250,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-lessons: {
-  flexDirection: 'row',
-  flexWrap: 'wrap', // 🔥 important for mobile
-  justifyContent: 'center',
-  padding: 20,
-},
+  lessons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    padding: 20,
+  },
 
-lessonCard: {
-  backgroundColor: '#ffffff',
-  padding: 20,
-  borderRadius: 12,
-  width: 250, // 🔥 fixed width (better than %)
-  margin: 10,
-  elevation: 3,
-},
+  lessonCard: {
+    backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 12,
+    width: 250,
+    margin: 10,
+    elevation: 3,
+  },
 
   lessonTitle: {
     color: '#4CAF50',
