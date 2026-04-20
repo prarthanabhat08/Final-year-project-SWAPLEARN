@@ -22,7 +22,7 @@ export default function Navbar({
         <Text style={styles.logo}>SwapLearn</Text>
       </TouchableOpacity>
 
-      
+      {/* MENU */}
       <View style={styles.menu}>
         <Text style={styles.link} onPress={goToHome}>Home</Text>
         <Text style={styles.link} onPress={goToAbout}>About</Text>
@@ -30,11 +30,11 @@ export default function Navbar({
         <Text style={styles.link} onPress={goToMatch}>Match</Text>
         
         {isLoggedIn && (
-          <Text style={styles.link} onPress={goToMessages}>
-            Messages
-          </Text>
+          <TouchableOpacity onPress={goToMessages}>
+            <Text style={styles.link}>Messages</Text>
+          </TouchableOpacity>
         )}
-    </View>
+      </View>
 
       {/* RIGHT SIDE */}
       <View style={styles.auth}>
@@ -51,7 +51,6 @@ export default function Navbar({
         ) : (
           <View style={styles.rightSection}>
 
-            {/* ✅ SHOW ONLY ON PROFILE PAGE */}
             {currentPage === 'profile' && (
               <TouchableOpacity onPress={() => {
                 console.log("🔔 clicked", goToRequests);
