@@ -33,7 +33,7 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
         taught: 0,
       };
 
-  // ✅ FETCH SKILLS
+
   useEffect(() => {
     if (!currentUser?.user_id) return;
 
@@ -43,7 +43,7 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
       .catch(err => console.log(err));
   }, [currentUser]);
 
-  // ✅ FETCH UPDATED USER (VERY IMPORTANT)
+
   useEffect(() => {
     if (!user?.user_id) return;
 
@@ -54,13 +54,21 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
       })
       .catch(err => console.log(err));
   }, []);
+
   useEffect(() => {
     if (!currentUser) return;
-      const username = currentUser?.username?.replace(/\s/g, '') || '';
 
-      fetch(`http://127.0.0.1:8000/api/get_calendar_slots/?username=${username}`)
+    const username = (currentUser.username || currentUser.name || "")
+      .replace(/\s/g, "")
+      .toLowerCase();
+
+    console.log("FETCH USERNAME:", username);
+
+    fetch(`http://127.0.0.1:8000/api/get_calendar_slots/?username=${username}`)
       .then(res => res.json())
       .then(data => {
+        console.log("DATA FROM API:", data);
+
         let mapped = {};
 
         data.forEach(item => {
@@ -73,14 +81,15 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
         setAvailability(mapped);
       })
       .catch(err => console.log(err));
-  }, [currentUser]);
 
+  }, [currentUser, props.previousScreen]);  
+  
   return (
     <>
       {isEditing ? (
 
         <EditProfile
-          user={currentUser}   // ✅ PASS currentUser
+          user={currentUser}  
           onSave={(updatedUser) => {
 
             setCurrentUser({
@@ -100,7 +109,6 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
 
           <Navbar {...props} currentPage="profile" goToRequests={goToRequests} />
 
-          {/* HEADER */}
           <View style={styles.headerCard}>
 
             <TouchableOpacity 
@@ -123,7 +131,6 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
               <Stat number={userData.taught} label="Taught" />
             </View>
 
-            {/* ACTION BUTTONS */}
             <View style={styles.actions}>
               <TouchableOpacity
                 style={styles.editBtn}
@@ -143,7 +150,6 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
 
           </View>
 
-          {/* TABS */}
           <View style={styles.tabs}>
             <Tab title="Skills" active={activeTab === 'skills'} onPress={() => setActiveTab('skills')} />
             <Tab title="Teaching" active={activeTab === 'teaching'} onPress={() => setActiveTab('teaching')} />
@@ -151,7 +157,6 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
             <Tab title="Feedback" active={activeTab === 'feedback'} onPress={() => setActiveTab('feedback')} />
           </View>
 
-          {/* CONTENT */}
           <View style={styles.section}>
             {activeTab === 'skills' && <SkillsSection skills={skills} />}
             {activeTab === 'teaching' && <Empty title="Teaching Sessions" />}
@@ -186,8 +191,6 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
     </>
   );
 }
-
-/* COMPONENTS SAME AS YOUR CODE (NO CHANGE) */
 
 const Stat = ({ number, label }) => (
   <View style={styles.stat}>
