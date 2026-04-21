@@ -185,7 +185,7 @@ def get_chats(request, user_id):
                     break
 
             data.append({
-                "room_id": room.id,   # ✅ INTEGER FIXED
+                "room_id": room.id,   
                 "name": other_user.full_name if other_user else "User",
                 "last_message": ""
             })
@@ -334,3 +334,89 @@ def discover_users(request, user_id):
         })
 
     return JsonResponse(result, safe=False)
+@csrf_exempt
+def update_profile(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        user = User.objects.get(user_id=data["user_id"])
+        user.username = data["name"]
+        user.email = data["email"]
+        user.save()
+
+        # 🔥 SAVE SKILLS
+        teach = data.get("teachSkills", [])
+        learn = data.get("learnSkills", [])
+
+        UserSkill.objects.filter(user=user).delete()
+
+        for s in teach:
+            skill_obj, _ = Skill.objects.get_or_create(
+                skill_name=s["skill"],
+                language=s["language"]
+            )
+            UserSkill.objects.create(user=user, skill=skill_obj, skill_type="teach")
+
+        for s in learn:
+            skill_obj, _ = Skill.objects.get_or_create(
+                skill_name=s["skill"],
+                language=s["language"]
+            )
+            UserSkill.objects.create(user=user, skill=skill_obj, skill_type="learn")
+
+        return JsonResponse({"message": "Profile updated"})
+    
+def get_user(request, user_id):
+    try:
+        user = User.objects.get(user_id=user_id)
+
+        return JsonResponse({
+            "user_id": user.user_id,
+            "username": user.username,
+            "email": user.email
+        })
+    except:
+        return JsonResponse({"error": "User not found"})
+    
+
+@csrf_exempt
+def save_calendar_slots(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+
+            username = data.get('username')
+            slots = data.get('slots')
+
+            from pymongo import MongoClient
+            client = MongoClient("mongodb://localhost:27017/")
+            db = client["swaplearn"]
+            collection = db["availability"]
+
+            collection.delete_many({"username": username})
+
+            for slot in slots:
+                collection.insert_one({
+                    "username": username,
+                    "day": slot["day"],
+                    "time": slot["time"]
+                })
+
+            return JsonResponse({"message": "Saved successfully"})
+
+        except Exception as e:
+            print("ERROR:", str(e))
+            return JsonResponse({"error": "Failed"}, status=500)
+
+@csrf_exempt
+def get_calendar_slots(request):
+    username = request.GET.get('username')
+
+    from pymongo import MongoClient
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client["swaplearn"]
+    collection = db["availability"]
+
+    data = list(collection.find({"username": username}, {"_id": 0}))
+
+    return JsonResponse(data, safe=False)
