@@ -28,3 +28,5 @@ urlpatterns = [
     path('api/get_calendar_slots/', views.get_calendar_slots),
 ]
 
+
+
