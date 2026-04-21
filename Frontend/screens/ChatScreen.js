@@ -10,13 +10,14 @@ import {
 
 export default function ChatScreen({ roomId, user, name, goBack }) {
 
+  console.log("ROOM ID:", roomId); 
+
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
-  /* ================= LOAD ================= */
   const loadMessages = async () => {
     try {
-      const res = await fetch(`http://192.168.1.4:8000/api/messages/${roomId}/`);
+      const res = await fetch(`http://127.0.0.1:8000/api/messages/${roomId}/`);
       const data = await res.json();
       setMessages(data);
     } catch (err) {
@@ -25,10 +26,17 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
   };
 
   useEffect(() => {
-    loadMessages();
-  }, []);
+    if (!roomId) return;
 
-  /* ================= SEND ================= */
+    loadMessages();
+
+    const interval = setInterval(() => {
+      loadMessages();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [roomId]);
+
   const sendMessage = async () => {
     if (!text.trim()) return;
 
@@ -41,7 +49,7 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
     ]);
 
     try {
-      await fetch(`http://192.168.1.4:8000/api/send-message/`, {
+      await fetch(`http://127.0.0.1:8000/api/send-message/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -59,28 +67,35 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
     }
   };
 
-  const renderMessage = ({ item }) => {
-    const isMe = String(item.sender) === String(user.user_id);
-
-    return (
-      <View style={{ alignItems: isMe ? "flex-end" : "flex-start" }}>
-        <View style={{
-          backgroundColor: isMe ? "#4CAF50" : "#ddd",
-          padding: 10,
-          margin: 5,
-          borderRadius: 10,
-          maxWidth: "70%"
-        }}>
-          <Text>{item.text}</Text>
-        </View>
-      </View>
-    );
-  };
+const renderMessage = ({ item }) => {
+  const isMe = String(item.sender) === String(user.user_id);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        alignItems: isMe ? "flex-end" : "flex-start",
+        marginVertical: 5,
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: isMe ? "#4CAF50" : "#ddd",
+          padding: 10,
+          borderRadius: 10,
+          maxWidth: "70%",
+        }}
+      >
+        <Text style={{ color: isMe ? "#fff" : "#000" }}>
+          {item.text}
+        </Text>
+      </View>
+    </View>
+  );
+};
 
-      {/* HEADER */}
+  return (
+    <View style={{ flex: 1, backgroundColor: "#f0f4f0" }}>
+
       <View style={{ backgroundColor: "#151a3c", padding: 15 }}>
         <TouchableOpacity onPress={goBack}>
           <Text style={{ color: "#fff" }}>← Back</Text>
@@ -91,14 +106,13 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
         </Text>
       </View>
 
-      {/* MESSAGES */}
       <FlatList
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={{ padding: 10, backgroundColor: "#f0f4f0" }}
       />
 
-      {/* INPUT */}
       <View style={{ flexDirection: "row", padding: 10 }}>
         <TextInput
           value={text}
