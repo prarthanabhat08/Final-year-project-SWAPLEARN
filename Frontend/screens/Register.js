@@ -80,7 +80,7 @@ export default function Register({ switchToLogin, goBack }) {
       const data = await response.json();
 
       if (!response.ok) {
-        alert("User creation failed ❌");
+        alert("User creation failed ");
         return;
       }
 
@@ -103,12 +103,12 @@ export default function Register({ switchToLogin, goBack }) {
         alert("Registration Successful ✅");
         switchToLogin();
       } else {
-        alert("Skills saving failed ❌");
+        alert("Skills saving failed ");
       }
 
     } catch (error) {
       console.log(error);
-      alert("Server error ❌");
+      alert("Server error ");
     }
   };
 
@@ -128,7 +128,6 @@ export default function Register({ switchToLogin, goBack }) {
         <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} />
         <TextInput placeholder="Password" style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
 
-        {/* TEACH */}
         <Text style={styles.skillHeading}>Skills you Teach</Text>
         <View style={styles.skillBar}>
           {teachSkills.map((item, index) => (
@@ -144,7 +143,6 @@ export default function Register({ switchToLogin, goBack }) {
           </TouchableOpacity>
         </View>
 
-        {/* LEARN */}
         <Text style={styles.skillHeading}>Skills you Want to Learn</Text>
         <View style={styles.skillBar}>
           {learnSkills.map((item, index) => (
@@ -160,7 +158,6 @@ export default function Register({ switchToLogin, goBack }) {
           </TouchableOpacity>
         </View>
 
-        {/* FLOW */}
         {step === 'category' && Object.keys(categories).map((cat) => (
           <TouchableOpacity key={cat} style={styles.option} onPress={() => {
             setSelectedCategory(cat);
