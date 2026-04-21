@@ -38,9 +38,14 @@ export default function Index() {
   }, []);
 
   const handleLoginSuccess = (userData: UserType) => {
-    setIsLoggedIn(true);
+    console.log("LOGIN SUCCESS:", userData);
+
     setUser(userData);
-    setScreen('home');
+    setIsLoggedIn(true);
+
+    setTimeout(() => {
+      setScreen('home');
+    }, 100); // small delay ensures state update
   };
 
   const handleLogout = () => {
@@ -56,13 +61,16 @@ export default function Index() {
   };
 
   const openChat = (roomId: string, name: string) => {
-    console.log("OPEN CHAT CLICKED:", roomId, name);
+    console.log("OPEN CHAT CLICKED:", roomId);
+
+    if (!roomId) {
+      console.log(" ROOM ID MISSING");
+      return;
+    }
 
     setSelectedRoom(roomId);
     setSelectedName(name);
     setScreen('chat');
-
-    console.log("AFTER SET SCREEN → chat");
   };
 
   if (screen === 'login') {
@@ -157,11 +165,23 @@ export default function Index() {
   }
 
   if (screen === 'messages') {
+    if (!user) {
+      console.log(" BLOCKED: user is null");
+      return (
+        <Login
+          switchToRegister={() => setScreen('register')}
+          onLoginSuccess={handleLoginSuccess}
+          goBack={() => setScreen('home')}
+        />
+      );
+    }
+
     return (
       <Messages
         user={user}
         isLoggedIn={isLoggedIn}
         openChat={openChat}
+        screen={screen}
         goToHome={() => goTo('home')}
         goToAbout={() => goTo('about')}
         goToDiscover={() => goTo('discover')}
@@ -174,6 +194,8 @@ export default function Index() {
       />
     );
   }
+  
+
   if (screen === 'availability') {
     return (
       <Availability
