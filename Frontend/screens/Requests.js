@@ -37,7 +37,7 @@ export default function Requests({ user, isLoggedIn, ...props }) {
         body: JSON.stringify({ request_id: id }),
       });
 
-      alert("Accepted ✅");
+      alert("Accepted ");
       loadRequests(); // refresh
 
     } catch (err) {
@@ -56,7 +56,7 @@ export default function Requests({ user, isLoggedIn, ...props }) {
         body: JSON.stringify({ request_id: id }),
       });
 
-      alert("Rejected ❌");
+      alert("Rejected ");
       loadRequests();
 
     } catch (err) {
