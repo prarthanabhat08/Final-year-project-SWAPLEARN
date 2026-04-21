@@ -10,26 +10,28 @@ import {
 } from 'react-native';
 import Navbar from './Navbar';
 
-export default function Messages({ openChat, user, ...props }){
+export default function Messages({ openChat, user, screen, ...props }){
 
   const [chats, setChats] = useState([]);
   const [activeUsers, setActiveUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+
   console.log("USER IN MESSAGES:", user);
 
-  /* ================= LOAD CHATS ================= */
-  const loadChats = async () => {
-    console.log("🔥 loadChats called");
 
-    if (!user) {
-      console.log("❌ user missing");
+  const loadChats = async () => {
+    console.log(" loadChats called");
+    console.log("USER:", user);
+
+    if (!user || !user.user_id) {
+      console.log(" USER NOT READY");
       return;
     }
 
     try {
       const res = await fetch(
-        `http://192.168.1.4:8000/api/chats/${user.user_id}/`
+        `http://127.0.0.1:8000/api/chats/${user.user_id}/`
       );
 
       console.log("STATUS:", res.status);
@@ -39,8 +41,20 @@ export default function Messages({ openChat, user, ...props }){
       console.log("DATA:", data);
 
       if (Array.isArray(data)) {
-        setChats(data);
-        setActiveUsers(data);
+
+      
+        const uniqueChats = [];
+        const seen = new Set();
+
+        data.forEach(item => {
+          if (!seen.has(item.name)) {
+            seen.add(item.name);
+            uniqueChats.push(item);
+          }
+        });
+
+        setChats(uniqueChats);
+        setActiveUsers(uniqueChats);
       }
 
     } catch (err) {
@@ -49,14 +63,21 @@ export default function Messages({ openChat, user, ...props }){
   };
 
   useEffect(() => {
-    loadChats();
+    console.log("👀 MESSAGES SCREEN OPENED");
 
-    const interval = setInterval(loadChats, 3000);
+    if (user && user.user_id) {
+      loadChats();
+    }
+
+    const interval = setInterval(() => {
+      if (user && user.user_id) {
+        loadChats();
+      }
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [user]);
-
-  /* ================= SEARCH ================= */
+  }, [screen, user]);   
+  
   const searchUsers = async (text) => {
     setSearch(text);
 
@@ -67,7 +88,7 @@ export default function Messages({ openChat, user, ...props }){
 
     try {
       const res = await fetch(
-        `http://192.168.1.4:8000/api/search-users/?q=${text}&user_id=${props.user.user_id}`
+        `http://127.0.0.1:8000/api/search-users/`
       );
 
       const data = await res.json();
@@ -78,7 +99,6 @@ export default function Messages({ openChat, user, ...props }){
     }
   };
 
-  /* ================= ACTIVE USERS ================= */
   const renderActiveUser = (user) => (
     <View key={user.room_id} style={styles.activeUser}>
       <View style={styles.storyCircle}>
@@ -90,7 +110,6 @@ export default function Messages({ openChat, user, ...props }){
     </View>
   );
 
-  /* ================= CHAT ITEM ================= */
   const renderChat = ({ item }) => {
 
     if (!item || !item.room_id) return null;
@@ -126,7 +145,6 @@ export default function Messages({ openChat, user, ...props }){
 
       <Text style={styles.title}>Messages</Text>
 
-      {/* ================= SEARCH ================= */}
       <View style={styles.searchBox}>
         <TextInput
           placeholder="Search users..."
@@ -136,7 +154,6 @@ export default function Messages({ openChat, user, ...props }){
         />
       </View>
 
-      {/* ================= SEARCH RESULTS ================= */}
       {searchResults.length > 0 && (
         <View style={{ paddingHorizontal: 15 }}>
           {searchResults.map((item) => (
@@ -162,7 +179,6 @@ export default function Messages({ openChat, user, ...props }){
         </View>
       )}
 
-      {/* ================= ACTIVE USERS ================= */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -171,7 +187,6 @@ export default function Messages({ openChat, user, ...props }){
         {activeUsers.map(renderActiveUser)}
       </ScrollView>
 
-      {/* ================= CHAT LIST ================= */}
       <View style={{ flex: 1 }}>
         <FlatList
           data={chats}
@@ -193,7 +208,7 @@ export default function Messages({ openChat, user, ...props }){
   );
 }
 
-/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f4f0' },
 
