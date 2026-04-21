@@ -7,14 +7,19 @@ import {
   ScrollView,
 } from 'react-native';
 import Navbar from './Navbar';
+import EditProfile from "./EditProfile";
 
 export default function ProfilePage({ user, goToRequests, handleLogout, ...props }) {
+
   const [activeTab, setActiveTab] = useState('skills');
   const [skills, setSkills] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user);
+  const [availability, setAvailability] = useState({});
 
-  const userData = user
+  const userData = currentUser
     ? {
-        name: user.name || "User",
+        name: currentUser.username || "User",
         bio: "",
         credits: 0,
         learnt: 0,
@@ -28,80 +33,161 @@ export default function ProfilePage({ user, goToRequests, handleLogout, ...props
         taught: 0,
       };
 
+  // ✅ FETCH SKILLS
   useEffect(() => {
-    if (!user || !user.user_id) return;
+    if (!currentUser?.user_id) return;
 
-    fetch(`http://127.0.0.1:8000/api/user-skills/${user.user_id}/`)
+    fetch(`http://127.0.0.1:8000/api/user-skills/${currentUser.user_id}/`)
       .then(res => res.json())
       .then(data => setSkills(data))
       .catch(err => console.log(err));
-  }, [user]);
+  }, [currentUser]);
+
+  // ✅ FETCH UPDATED USER (VERY IMPORTANT)
+  useEffect(() => {
+    if (!user?.user_id) return;
+
+    fetch(`http://127.0.0.1:8000/api/get-user/${user.user_id}/`)
+      .then(res => res.json())
+      .then(data => {
+        setCurrentUser(data);
+      })
+      .catch(err => console.log(err));
+  }, []);
+  useEffect(() => {
+    if (!currentUser) return;
+      const username = currentUser?.username?.replace(/\s/g, '') || '';
+
+      fetch(`http://127.0.0.1:8000/api/get_calendar_slots/?username=${username}`)
+      .then(res => res.json())
+      .then(data => {
+        let mapped = {};
+
+        data.forEach(item => {
+          if (!mapped[item.day]) {
+            mapped[item.day] = [];
+          }
+          mapped[item.day].push(item.time);
+        });
+
+        setAvailability(mapped);
+      })
+      .catch(err => console.log(err));
+  }, [currentUser]);
 
   return (
-    <ScrollView style={styles.container}>
+    <>
+      {isEditing ? (
 
-      <Navbar {...props} currentPage="profile" goToRequests={goToRequests} />
+        <EditProfile
+          user={currentUser}   // ✅ PASS currentUser
+          onSave={(updatedUser) => {
 
-      {/* HEADER */}
-      <View style={styles.headerCard}>
+            setCurrentUser({
+              ...currentUser,
+              username: updatedUser.name,
+              email: updatedUser.email
+            });
 
-        {/* ✅ BACK BUTTON INSIDE BLUE */}
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => props.setScreen(props.previousScreen)}
-        >
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+            setIsEditing(false);
+          }}
+          onCancel={() => setIsEditing(false)}
+        />
 
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>👤</Text>
-        </View>
+      ) : (
 
-        <Text style={styles.name}>{userData.name}</Text>
-        <Text style={styles.bio}>{userData.bio}</Text>
+        <ScrollView style={styles.container}>
 
-        <View style={styles.stats}>
-          <Stat number={userData.credits} label="Credits" />
-          <Stat number={userData.learnt} label="Learnt" />
-          <Stat number={userData.taught} label="Taught" />
-        </View>
+          <Navbar {...props} currentPage="profile" goToRequests={goToRequests} />
 
-        {/* ACTION BUTTONS */}
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.editBtn}>
-            <Text style={styles.editText}>Edit</Text>
+          {/* HEADER */}
+          <View style={styles.headerCard}>
+
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => props.setScreen(props.previousScreen)}
+            >
+              <Text style={styles.backText}>Back</Text>
+            </TouchableOpacity>
+
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>👤</Text>
+            </View>
+
+            <Text style={styles.name}>{userData.name}</Text>
+            <Text style={styles.bio}>{userData.bio}</Text>
+
+            <View style={styles.stats}>
+              <Stat number={userData.credits} label="Credits" />
+              <Stat number={userData.learnt} label="Learnt" />
+              <Stat number={userData.taught} label="Taught" />
+            </View>
+
+            {/* ACTION BUTTONS */}
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.editBtn}
+                onPress={() => setIsEditing(true)}
+              >
+                <Text style={styles.editText}>Edit</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.shareBtn}>
+                <Text style={styles.shareText}>Share</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity onPress={handleLogout}>
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+
+          </View>
+
+          {/* TABS */}
+          <View style={styles.tabs}>
+            <Tab title="Skills" active={activeTab === 'skills'} onPress={() => setActiveTab('skills')} />
+            <Tab title="Teaching" active={activeTab === 'teaching'} onPress={() => setActiveTab('teaching')} />
+            <Tab title="Learning" active={activeTab === 'learning'} onPress={() => setActiveTab('learning')} />
+            <Tab title="Feedback" active={activeTab === 'feedback'} onPress={() => setActiveTab('feedback')} />
+          </View>
+
+          {/* CONTENT */}
+          <View style={styles.section}>
+            {activeTab === 'skills' && <SkillsSection skills={skills} />}
+            {activeTab === 'teaching' && <Empty title="Teaching Sessions" />}
+            {activeTab === 'learning' && <Empty title="Learning Sessions" />}
+            {activeTab === 'feedback' && <Empty title="Feedback" />}
+          </View>
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 10 }}>
+              Your Availability
+            </Text>
+
+            {Object.keys(availability).length === 0 ? (
+              <Text>No availability set</Text>
+            ) : (
+              Object.keys(availability).map(day => (
+                <View key={day} style={{ marginBottom: 5 }}>
+                  <Text style={{ fontWeight: 'bold' }}>{day}</Text>
+                  <Text>{availability[day].join(', ')}</Text>
+                </View>
+              ))
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.availabilityBtn}
+            onPress={() => props.setScreen('availability')}
+          >
+            <Text style={styles.availabilityText}>Set Availability</Text>
           </TouchableOpacity>
+        </ScrollView>
 
-          <TouchableOpacity style={styles.shareBtn}>
-            <Text style={styles.shareText}>Share</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-
-      </View>
-
-      {/* TABS */}
-      <View style={styles.tabs}>
-        <Tab title="Skills" active={activeTab === 'skills'} onPress={() => setActiveTab('skills')} />
-        <Tab title="Teaching" active={activeTab === 'teaching'} onPress={() => setActiveTab('teaching')} />
-        <Tab title="Learning" active={activeTab === 'learning'} onPress={() => setActiveTab('learning')} />
-        <Tab title="Feedback" active={activeTab === 'feedback'} onPress={() => setActiveTab('feedback')} />
-      </View>
-
-      {/* CONTENT */}
-      <View style={styles.section}>
-        {activeTab === 'skills' && <SkillsSection skills={skills} />}
-        {activeTab === 'teaching' && <Empty title="Teaching Sessions" />}
-        {activeTab === 'learning' && <Empty title="Learning Sessions" />}
-        {activeTab === 'feedback' && <Empty title="Feedback" />}
-      </View>
-
-    </ScrollView>
+      )}
+    </>
   );
 }
+
+/* COMPONENTS SAME AS YOUR CODE (NO CHANGE) */
 
 const Stat = ({ number, label }) => (
   <View style={styles.stat}>
@@ -170,7 +256,6 @@ const Empty = ({ title }) => (
   </View>
 );
 
-/* STYLES */
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f4f0' },
@@ -181,7 +266,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  /* ✅ FINAL BACK BUTTON STYLE */
   backButton: {
     position: 'absolute',
     top: 15,
@@ -197,7 +281,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  availabilityBtn: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    backgroundColor: '#151a3c',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center'
+  },
 
+  availabilityText: {
+    color: '#fff',
+    fontWeight: 'bold'
+  },
   logoutText: {
     color: 'red',
     textAlign: 'center',
