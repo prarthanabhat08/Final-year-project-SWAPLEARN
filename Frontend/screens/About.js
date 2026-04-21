@@ -1,4 +1,6 @@
 import React from 'react';
+
+import { TouchableOpacity } from 'react-native';
 import {
   View,
   Text,
@@ -8,22 +10,28 @@ import {
 import Navbar from './Navbar';
 
 export default function About(props) {
+
   return (
     <ScrollView style={styles.container}>
 
-      {/* NAVBAR */}
       <Navbar {...props} currentPage="about" />
 
-      {/* HERO */}
       <View style={styles.hero}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => props.goToHome()}
+        >
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+
         <Text style={styles.heroTitle}>About</Text>
         <Text style={styles.heroHighlight}>SwapLearn</Text>
+
         <Text style={styles.subtitle}>
           Learn • Teach • Grow Together
         </Text>
       </View>
 
-      {/* CARD SECTIONS */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Our Mission</Text>
         <Text style={styles.cardText}>
@@ -49,7 +57,6 @@ export default function About(props) {
         </Text>
       </View>
 
-      {/* FEATURE HIGHLIGHTS */}
       <View style={styles.featuresRow}>
         <View style={styles.featureBox}>
           <Text style={styles.featureNumber}>100+</Text>
@@ -67,7 +74,6 @@ export default function About(props) {
         </View>
       </View>
 
-      {/* FOOTER */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
           © SwapLearn. All rights reserved.
@@ -84,7 +90,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f4f0',
   },
 
-  /* HERO */
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 20,
+
+    backgroundColor: '#3fad48',  
+    padding: 8,
+    borderRadius: 10,
+
+    elevation: 3,
+  },
+
+  backText: {
+    fontSize: 12,
+    color: '#151a3c', 
+    fontWeight: 'bold',
+  },
+
   hero: {
     alignItems: 'center',
     paddingVertical: 60,
@@ -92,6 +115,7 @@ const styles = StyleSheet.create({
 
   heroTitle: {
     fontSize: 32,
+    fontWeight: 'bold',
     color: '#151a3c',
   },
 
@@ -106,7 +130,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  /* CARDS */
   card: {
     backgroundColor: '#fff',
     marginHorizontal: 20,
@@ -128,7 +151,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  /* FEATURES */
   featuresRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -155,7 +177,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  /* FOOTER */
   footer: {
     alignItems: 'center',
     padding: 25,
