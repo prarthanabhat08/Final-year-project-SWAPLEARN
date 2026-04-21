@@ -21,7 +21,12 @@ export default function Availability({ user, goBack }) {
 
   const [selected, setSelected] = useState({});
 
-  // ---------------- TOGGLE SLOT ----------------
+  const getUsername = () => {
+    return (user?.username || user?.name || "")
+      .replace(/\s/g, "")
+      .toLowerCase();
+  };
+
   const toggleSlot = (day, time) => {
     const daySlots = selected[day] || [];
 
@@ -35,16 +40,12 @@ export default function Availability({ user, goBack }) {
     });
   };
 
-  // ---------------- SAVE ----------------
   const save = async () => {
     let payload = [];
 
     Object.keys(selected).forEach(day => {
       selected[day].forEach(time => {
-        payload.push({
-          day: day,
-          time: time
-        });
+        payload.push({ day, time });
       });
     });
 
@@ -53,14 +54,13 @@ export default function Availability({ user, goBack }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-           username: (user?.username || user?.name || '').replace(/\s/g, ''),
+          username: getUsername(),   
           slots: payload
         })
       });
 
       const data = await res.json();
       console.log("SAVE RESPONSE:", data);
-
       alert("Saved Successfully");
       goBack?.();
 
@@ -70,11 +70,14 @@ export default function Availability({ user, goBack }) {
     }
   };
 
-  // ---------------- FETCH ----------------
   const fetchAvailability = async () => {
     try {
+      const username = getUsername();  
+
+      console.log("FETCH USERNAME:", username);
+
       const res = await fetch(
-        `${API}/get_calendar_slots/?username=${user.username}`
+        `${API}/get_calendar_slots/?username=${username}`
       );
 
       const data = await res.json();
@@ -85,17 +88,12 @@ export default function Availability({ user, goBack }) {
 
       data.forEach(item => {
         const day = item.day;
-        const slots = item.slots || [];
-
-        const cleanSlots = Array.isArray(slots)
-          ? slots
-          : [slots];
-
+        const time = item.time;  
         if (!mapped[day]) {
           mapped[day] = [];
         }
 
-        mapped[day] = [...mapped[day], ...cleanSlots];
+        mapped[day].push(time);
       });
 
       console.log("MAPPED FINAL:", mapped);
@@ -107,12 +105,10 @@ export default function Availability({ user, goBack }) {
     }
   };
 
-  // 🔥 IMPORTANT FIX (YOU WERE MISSING THIS)
   useEffect(() => {
     fetchAvailability();
   }, []);
 
-  // ---------------- UI ----------------
   return (
     <ScrollView style={styles.container}>
 
@@ -156,7 +152,6 @@ export default function Availability({ user, goBack }) {
   );
 }
 
-// ---------------- STYLES ----------------
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: '#f4f6fb' },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
