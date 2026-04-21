@@ -9,10 +9,12 @@ import Profile from '../screens/Profile';
 import Messages from '../screens/Messages';
 import Requests from '../screens/Requests';
 import ChatScreen from '../screens/ChatScreen';
+import Availability from '../screens/Availability';
 
 type UserType = {
   user_id: number;
   name: string;
+  username?: string;
 };
 
 export default function Index() {
@@ -172,7 +174,14 @@ export default function Index() {
       />
     );
   }
-
+  if (screen === 'availability') {
+    return (
+      <Availability
+        user={user}
+        goBack={() => setScreen('profile')}
+      />
+    );
+  }
 
   if (screen === 'chat') {
     return (
