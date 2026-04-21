@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import get_user, update_profile
 
 urlpatterns = [
     path('', views.home),
@@ -20,7 +21,10 @@ urlpatterns = [
     
     path('api/discover/<int:user_id>/', views.discover_users),
     path('api/chats/<int:user_id>/', views.get_chats),
+    path('api/update-profile/', update_profile),
+    path('api/get-user/<int:user_id>/', get_user),
+    
+    path('api/save_calendar_slots/', views.save_calendar_slots),
+    path('api/get_calendar_slots/', views.get_calendar_slots),
 ]
-
-
 
