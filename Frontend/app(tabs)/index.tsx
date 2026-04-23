@@ -45,7 +45,7 @@ export default function Index() {
 
     setTimeout(() => {
       setScreen('home');
-    }, 100); // small delay ensures state update
+    }, 100); 
   };
 
   const handleLogout = () => {
