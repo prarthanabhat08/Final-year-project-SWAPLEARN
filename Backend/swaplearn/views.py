@@ -14,8 +14,6 @@ print("CORRECT VIEWS.PY RUNNING ")
 def home(request):
     return render(request, 'add.html')
 
-
-# ================= REGISTER =================
 @csrf_exempt
 def register(request):
     if request.method == "POST":
@@ -52,7 +50,6 @@ def api_add_user(request):
     return JsonResponse({"error": "POST required"}, status=400)
 
 
-# ================= LOGIN =================
 @csrf_exempt
 def api_login(request):
     if request.method == "POST":
@@ -77,7 +74,6 @@ def api_login(request):
     return JsonResponse({"error": "POST only"}, status=400)
 
 
-# ================= REQUEST =================
 def api_get_users(request):
     users = User.objects.all()
 
@@ -130,7 +126,6 @@ def get_requests(request, user_id):
     ], safe=False)
 
 
-# ================= ACCEPT REQUEST =================
 @csrf_exempt
 def accept_request(request):
     if request.method == "POST":
@@ -144,7 +139,6 @@ def accept_request(request):
         sender = req.sender
         receiver = req.receiver
 
-        # ✅ SIMPLE CHECK (Djongo compatible)
         rooms = ChatRoom.objects.all()
         existing_room = None
 
@@ -156,21 +150,19 @@ def accept_request(request):
                 existing_room = room
                 break
 
-        # ✅ CREATE ROOM IF NOT EXISTS
         if not existing_room:
             room = ChatRoom.objects.create()
             room.users.add(sender)
             room.users.add(receiver)
 
-            print("🔥 ROOM CREATED:", room.id)
+            print("ROOM CREATED:", room.id)
         else:
-            print("✅ ROOM EXISTS:", existing_room.id)
+            print(" ROOM EXISTS:", existing_room.id)
 
         return JsonResponse({"message": "Accepted + chat ready"})
 
     return JsonResponse({"error": "POST only"}, status=400)
 
-# ================= CHAT LIST =================
 def get_chats(request, user_id):
     try:
         data = []
@@ -181,11 +173,9 @@ def get_chats(request, user_id):
             users = list(room.users.all())
             user_ids = [u.user_id for u in users]
 
-            # ✅ check if current user is in this room
             if int(user_id) not in user_ids:
                 continue
 
-            # ✅ get other user
             other_user = None
             for u in users:
                 if u.user_id != int(user_id):
@@ -199,16 +189,15 @@ def get_chats(request, user_id):
                     "last_message": ""
                 })
 
-        print("🔥 FINAL CHAT LIST:", data)
+        print("FINAL CHAT LIST:", data)
 
         return JsonResponse(data, safe=False)
 
     except Exception as e:
-        print("❌ ERROR:", e)
+        print("ERROR:", e)
         return JsonResponse({"error": str(e)}, status=500)
 
 
-# ================= LOAD MESSAGES =================
 def get_messages(request, room_id):
     print(" FETCHING MESSAGES FOR ROOM:", room_id)
 
@@ -224,7 +213,6 @@ def get_messages(request, room_id):
         for m in msgs
     ], safe=False)
 
-# ================= SEND MESSAGE =================
 @csrf_exempt
 def send_message(request):
     if request.method == "POST":
@@ -233,7 +221,7 @@ def send_message(request):
         sender = User.objects.get(user_id=data.get("sender_id"))
         room = ChatRoom.objects.get(id=data.get("room_id"))
 
-        print("🔥 SENDING MESSAGE TO ROOM:", room.id)  # ✅ DEBUG
+        print("SENDING MESSAGE TO ROOM:", room.id)  
 
         Message.objects.create(
             sender=sender,
@@ -246,7 +234,6 @@ def send_message(request):
     return JsonResponse({"error": "POST only"}, status=400)
 
 
-# ================= SKILLS =================
 @csrf_exempt
 def save_user_skills(request):
     if request.method == "POST":
