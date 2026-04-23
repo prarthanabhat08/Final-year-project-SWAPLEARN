@@ -10,9 +10,12 @@ from django.db.models import Count
 print("RUNNING FROM:", os.getcwd())
 print("CORRECT VIEWS.PY RUNNING ")   
 
+
 def home(request):
     return render(request, 'add.html')
 
+
+# ================= REGISTER =================
 @csrf_exempt
 def register(request):
     if request.method == "POST":
@@ -26,7 +29,9 @@ def register(request):
             password=hashed_password
         )
         return render(request, 'success.html')
+
     return JsonResponse({"error": "POST required"}, status=400)
+
 
 @csrf_exempt
 def api_add_user(request):
@@ -43,8 +48,11 @@ def api_add_user(request):
         )
 
         return JsonResponse({"id": user.user_id})
+
     return JsonResponse({"error": "POST required"}, status=400)
 
+
+# ================= LOGIN =================
 @csrf_exempt
 def api_login(request):
     if request.method == "POST":
@@ -68,6 +76,8 @@ def api_login(request):
 
     return JsonResponse({"error": "POST only"}, status=400)
 
+
+# ================= REQUEST =================
 def api_get_users(request):
     users = User.objects.all()
 
@@ -119,6 +129,8 @@ def get_requests(request, user_id):
         for r in reqs
     ], safe=False)
 
+
+# ================= ACCEPT REQUEST =================
 @csrf_exempt
 def accept_request(request):
     if request.method == "POST":
@@ -132,6 +144,7 @@ def accept_request(request):
         sender = req.sender
         receiver = req.receiver
 
+        # ✅ SIMPLE CHECK (Djongo compatible)
         rooms = ChatRoom.objects.all()
         existing_room = None
 
@@ -143,20 +156,21 @@ def accept_request(request):
                 existing_room = room
                 break
 
-        
+        # ✅ CREATE ROOM IF NOT EXISTS
         if not existing_room:
             room = ChatRoom.objects.create()
             room.users.add(sender)
             room.users.add(receiver)
 
-            print("ROOM CREATED:", room.id)
+            print("🔥 ROOM CREATED:", room.id)
         else:
-            print("ROOM EXISTS:", existing_room.id)
+            print("✅ ROOM EXISTS:", existing_room.id)
 
         return JsonResponse({"message": "Accepted + chat ready"})
 
     return JsonResponse({"error": "POST only"}, status=400)
 
+# ================= CHAT LIST =================
 def get_chats(request, user_id):
     try:
         data = []
@@ -167,9 +181,11 @@ def get_chats(request, user_id):
             users = list(room.users.all())
             user_ids = [u.user_id for u in users]
 
+            # ✅ check if current user is in this room
             if int(user_id) not in user_ids:
                 continue
 
+            # ✅ get other user
             other_user = None
             for u in users:
                 if u.user_id != int(user_id):
@@ -183,15 +199,16 @@ def get_chats(request, user_id):
                     "last_message": ""
                 })
 
-        print("FINAL CHAT LIST:", data)
+        print("🔥 FINAL CHAT LIST:", data)
 
         return JsonResponse(data, safe=False)
 
     except Exception as e:
-        print("ERROR:", e)
+        print("❌ ERROR:", e)
         return JsonResponse({"error": str(e)}, status=500)
 
 
+# ================= LOAD MESSAGES =================
 def get_messages(request, room_id):
     print(" FETCHING MESSAGES FOR ROOM:", room_id)
 
@@ -207,7 +224,7 @@ def get_messages(request, room_id):
         for m in msgs
     ], safe=False)
 
-
+# ================= SEND MESSAGE =================
 @csrf_exempt
 def send_message(request):
     if request.method == "POST":
@@ -216,7 +233,7 @@ def send_message(request):
         sender = User.objects.get(user_id=data.get("sender_id"))
         room = ChatRoom.objects.get(id=data.get("room_id"))
 
-        print(" SENDING MESSAGE TO ROOM:", room.id) 
+        print("🔥 SENDING MESSAGE TO ROOM:", room.id)  # ✅ DEBUG
 
         Message.objects.create(
             sender=sender,
@@ -229,6 +246,7 @@ def send_message(request):
     return JsonResponse({"error": "POST only"}, status=400)
 
 
+# ================= SKILLS =================
 @csrf_exempt
 def save_user_skills(request):
     if request.method == "POST":
@@ -333,31 +351,55 @@ def update_profile(request):
         data = json.loads(request.body)
 
         user = User.objects.get(user_id=data["user_id"])
+
         user.username = data["name"]
         user.email = data["email"]
         user.save()
 
-     
         teach = data.get("teachSkills", [])
         learn = data.get("learnSkills", [])
-
-        UserSkill.objects.filter(user=user).delete()
 
         for s in teach:
             skill_obj, _ = Skill.objects.get_or_create(
                 skill_name=s["skill"],
                 language=s["language"]
             )
-            UserSkill.objects.create(user=user, skill=skill_obj, skill_type="teach")
+
+            if not UserSkill.objects.filter(
+                user=user,
+                skill=skill_obj,
+                skill_type="teach"
+            ).exists():
+
+                UserSkill.objects.create(
+                    user=user,
+                    skill=skill_obj,
+                    skill_type="teach"
+                )
+
 
         for s in learn:
             skill_obj, _ = Skill.objects.get_or_create(
                 skill_name=s["skill"],
                 language=s["language"]
             )
-            UserSkill.objects.create(user=user, skill=skill_obj, skill_type="learn")
+
+            if not UserSkill.objects.filter(
+                user=user,
+                skill=skill_obj,
+                skill_type="learn"
+            ).exists():
+
+                UserSkill.objects.create(
+                    user=user,
+                    skill=skill_obj,
+                    skill_type="learn"
+                )
 
         return JsonResponse({"message": "Profile updated"})
+
+    return JsonResponse({"error": "POST only"}, status=400)
+
     
 def get_user(request, user_id):
     try:
