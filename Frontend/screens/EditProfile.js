@@ -143,6 +143,7 @@ export default function EditProfile({ user, onSave, onCancel }) {
           </div>
         ))}
 
+   
         <div style={styles.btnRow}>
           <button onClick={handleSave} style={styles.saveBtn}>Save Changes</button>
           <button onClick={onCancel} style={styles.cancelBtn}>Cancel</button>
