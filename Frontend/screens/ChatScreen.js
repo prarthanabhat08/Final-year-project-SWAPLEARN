@@ -5,12 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
+  Linking,
 } from 'react-native';
 
 export default function ChatScreen({ roomId, user, name, goBack }) {
-
-  console.log("ROOM ID:", roomId); 
 
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -67,52 +65,92 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
     }
   };
 
-const renderMessage = ({ item }) => {
-  const isMe = String(item.sender) === String(user.user_id);
+  // 🎥 VIDEO CALL FUNCTION
+  const startVideoCall = () => {
+    const meetingRoom = `swaplearn_${roomId}`;
+    const url = `https://meet.jit.si/${meetingRoom}`;
+    Linking.openURL(url);
+  };
 
-  return (
-    <View
-      style={{
-        alignItems: isMe ? "flex-end" : "flex-start",
-        marginVertical: 5,
-      }}
-    >
+  const renderMessage = ({ item }) => {
+    const isMe = String(item.sender) === String(user.user_id);
+
+    return (
       <View
         style={{
-          backgroundColor: isMe ? "#4CAF50" : "#ddd",
-          padding: 10,
-          borderRadius: 10,
-          maxWidth: "70%",
+          alignItems: isMe ? "flex-end" : "flex-start",
+          marginVertical: 5,
         }}
       >
-        <Text style={{ color: isMe ? "#fff" : "#000" }}>
-          {item.text}
-        </Text>
+        <View
+          style={{
+            backgroundColor: isMe ? "#4CAF50" : "#ddd",
+            padding: 10,
+            borderRadius: 10,
+            maxWidth: "70%",
+          }}
+        >
+          <Text style={{ color: isMe ? "#fff" : "#000" }}>
+            {item.text}
+          </Text>
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f0f4f0" }}>
 
-      <View style={{ backgroundColor: "#151a3c", padding: 15 }}>
-        <TouchableOpacity onPress={goBack}>
-          <Text style={{ color: "#fff" }}>← Back</Text>
+      {/* HEADER */}
+      <View
+        style={{
+          backgroundColor: "#151a3c",
+          padding: 15,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
+
+        <View>
+          <TouchableOpacity onPress={goBack}>
+            <Text style={{ color: "#fff" }}>← Back</Text>
+          </TouchableOpacity>
+
+          <Text style={{ color: "#fff", fontSize: 18, marginTop: 5 }}>
+            {name}
+          </Text>
+        </View>
+
+        {/* 🎥 VIDEO CALL BUTTON */}
+        <TouchableOpacity
+          onPress={startVideoCall}
+          style={{
+            backgroundColor: "#4CAF50",
+            paddingVertical: 10,
+            paddingHorizontal: 15,
+            borderRadius: 10
+          }}
+        >
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>
+            📹 Call
+          </Text>
         </TouchableOpacity>
 
-        <Text style={{ color: "#fff", fontSize: 18 }}>
-          {name}
-        </Text>
       </View>
 
+      {/* CHAT LIST */}
       <FlatList
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={{ padding: 10, backgroundColor: "#f0f4f0" }}
+        contentContainerStyle={{
+          padding: 10,
+          backgroundColor: "#f0f4f0"
+        }}
       />
 
+      {/* MESSAGE BOX */}
       <View style={{ flexDirection: "row", padding: 10 }}>
         <TextInput
           value={text}
@@ -122,12 +160,15 @@ const renderMessage = ({ item }) => {
             flex: 1,
             borderWidth: 1,
             borderColor: "#ccc",
-            padding: 10
+            padding: 10,
+            borderRadius: 10
           }}
         />
 
         <TouchableOpacity onPress={sendMessage}>
-          <Text style={{ padding: 10 }}>Send</Text>
+          <Text style={{ padding: 10, fontWeight: "bold" }}>
+            Send
+          </Text>
         </TouchableOpacity>
       </View>
 
