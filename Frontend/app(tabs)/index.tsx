@@ -38,14 +38,14 @@ export default function Index() {
   }, []);
 
   const handleLoginSuccess = (userData: UserType) => {
-    console.log("LOGIN SUCCESS:", userData);
+    console.log("✅ LOGIN SUCCESS:", userData);
 
     setUser(userData);
     setIsLoggedIn(true);
 
     setTimeout(() => {
       setScreen('home');
-    }, 100); 
+    }, 100); // small delay ensures state update
   };
 
   const handleLogout = () => {
