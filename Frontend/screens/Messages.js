@@ -19,13 +19,13 @@ export default function Messages({ openChat, user, screen, ...props }){
 
   console.log("USER IN MESSAGES:", user);
 
-
+  /* ================= LOAD CHATS ================= */
   const loadChats = async () => {
-    console.log(" loadChats called");
+    console.log("🔥 loadChats called");
     console.log("USER:", user);
 
     if (!user || !user.user_id) {
-      console.log(" USER NOT READY");
+      console.log("❌ USER NOT READY");
       return;
     }
 
@@ -62,6 +62,7 @@ export default function Messages({ openChat, user, screen, ...props }){
     }
   };
 
+  /* ================= FIXED USE EFFECT ================= */
   useEffect(() => {
     console.log("👀 MESSAGES SCREEN OPENED");
 
@@ -76,8 +77,10 @@ export default function Messages({ openChat, user, screen, ...props }){
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [screen, user]);   
-  
+  }, [screen, user]);   // ✅ IMPORTANT FIX
+
+
+  /* ================= SEARCH ================= */
   const searchUsers = async (text) => {
     setSearch(text);
 
@@ -99,6 +102,7 @@ export default function Messages({ openChat, user, screen, ...props }){
     }
   };
 
+  /* ================= ACTIVE USERS ================= */
   const renderActiveUser = (user) => (
     <View key={user.room_id} style={styles.activeUser}>
       <View style={styles.storyCircle}>
@@ -110,6 +114,7 @@ export default function Messages({ openChat, user, screen, ...props }){
     </View>
   );
 
+  /* ================= CHAT ITEM ================= */
   const renderChat = ({ item }) => {
 
     if (!item || !item.room_id) return null;
@@ -145,6 +150,7 @@ export default function Messages({ openChat, user, screen, ...props }){
 
       <Text style={styles.title}>Messages</Text>
 
+      {/* ================= SEARCH ================= */}
       <View style={styles.searchBox}>
         <TextInput
           placeholder="Search users..."
@@ -154,6 +160,7 @@ export default function Messages({ openChat, user, screen, ...props }){
         />
       </View>
 
+      {/* ================= SEARCH RESULTS ================= */}
       {searchResults.length > 0 && (
         <View style={{ paddingHorizontal: 15 }}>
           {searchResults.map((item) => (
@@ -179,6 +186,7 @@ export default function Messages({ openChat, user, screen, ...props }){
         </View>
       )}
 
+      {/* ================= ACTIVE USERS ================= */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -187,6 +195,7 @@ export default function Messages({ openChat, user, screen, ...props }){
         {activeUsers.map(renderActiveUser)}
       </ScrollView>
 
+      {/* ================= CHAT LIST ================= */}
       <View style={{ flex: 1 }}>
         <FlatList
           data={chats}
@@ -208,7 +217,7 @@ export default function Messages({ openChat, user, screen, ...props }){
   );
 }
 
-
+/* ================= STYLES ================= */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f4f0' },
 
