@@ -33,6 +33,7 @@ export default function Discover({ user, isLoggedIn, ...props }) {
       return;
     }
 
+    // CANCEL REQUEST
     if (connections[u.user_id]) {
       setConnections(prev => {
         const updated = { ...prev };
@@ -40,11 +41,13 @@ export default function Discover({ user, isLoggedIn, ...props }) {
         return updated;
       });
 
-      alert("Request Cancelled ");
+      // POPUP
+      alert("Request Cancelled ❌");
 
       return;
     }
 
+    //  SEND REQUEST
     try {
       await fetch("http://localhost:8000/api/send-request/", {
         method: "POST",
@@ -64,7 +67,8 @@ export default function Discover({ user, isLoggedIn, ...props }) {
         [u.user_id]: true
       }));
 
-      alert("Request Sent ");
+      // ✅ POPUP
+      alert("Request Sent 🚀");
 
     } catch (err) {
       console.log(err);
