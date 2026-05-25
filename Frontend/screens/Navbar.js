@@ -17,10 +17,12 @@ export default function Navbar({
   return (
     <View style={styles.navbar}>
 
+      {/* LOGO */}
       <TouchableOpacity onPress={goToHome}>
         <Text style={styles.logo}>SwapLearn</Text>
       </TouchableOpacity>
 
+      {/* MENU */}
       <View style={styles.menu}>
         <Text style={styles.link} onPress={goToHome}>Home</Text>
         <Text style={styles.link} onPress={goToAbout}>About</Text>
@@ -34,6 +36,7 @@ export default function Navbar({
         )}
       </View>
 
+      {/* RIGHT SIDE */}
       <View style={styles.auth}>
         {!isLoggedIn ? (
           <>
