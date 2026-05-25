@@ -44,21 +44,24 @@ export default function Match({ user, isLoggedIn, ...props }) {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Request Sent ");
+        alert("Request Sent 🚀");
       } else {
         alert(data.error);
       }
 
     } catch (err) {
       console.log(err);
-      alert("Server error ");
+      alert("Server error ❌");
     }
   };
 
   return (
     <ScrollView style={styles.container}>
+
+      {/* NAVBAR */}
       <Navbar isLoggedIn={isLoggedIn} {...props} currentPage="match" />
 
+      {/* BACK BUTTON */}
       <View style={styles.hero}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -68,8 +71,10 @@ export default function Match({ user, isLoggedIn, ...props }) {
         </TouchableOpacity>
       </View>
 
+      {/* TITLE */}
       <Text style={styles.title}>Best Matches</Text>
 
+      {/* CONTENT */}
       {!user ? (
         <Text style={styles.noMatch}>Login to see matches</Text>
       ) : matches.length === 0 ? (
@@ -105,6 +110,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f4f0' 
   },
 
+  /* BACK BUTTON */
   hero: {
     height: 50,
     justifyContent: 'center',
