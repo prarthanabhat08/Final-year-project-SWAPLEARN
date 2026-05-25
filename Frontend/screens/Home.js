@@ -1,11 +1,11 @@
-import React, { useState } from 'react';   
+import React, { useState } from 'react';   // ✅ added useState
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  TextInput,  
+  TextInput,   // ✅ added TextInput
 } from 'react-native';
 import Navbar from './Navbar';
 
@@ -22,14 +22,14 @@ export default function Home({
   goToRequests, 
 }) {
 
-  const [searchText, setSearchText] = useState(''); 
+  const [searchText, setSearchText] = useState(''); // ✅ added
 
   return (
 
     <ScrollView style={styles.container}
       keyboardShouldPersistTaps="handled" 
     >
- 
+      {/* NAVBAR */}
       <Navbar
         isLoggedIn={isLoggedIn}
         goToLogin={goToLogin}
@@ -52,6 +52,7 @@ export default function Home({
         />
       </View>
 
+      {/* HERO SECTION */}
       <View style={styles.hero}>
         <Text style={styles.heroTitle}>Teach, Learn,</Text>
         <Text style={styles.heroHighlight}>Grow Together</Text>
@@ -71,6 +72,7 @@ export default function Home({
         </View>
       </View>
 
+      {/* FEATURES */}
       <View style={styles.features}>
         {['Become a Teacher', 'Learn from Peers', 'Diverse Skills'].map(
           (item, i) => (
@@ -84,6 +86,7 @@ export default function Home({
         )}
       </View>
 
+      {/* LESSONS */}
       <Text style={styles.sectionTitle}>Available Lessons</Text>
 
       <View style={styles.lessons}>
@@ -118,6 +121,7 @@ export default function Home({
         ))}
       </View>
 
+      {/* FOOTER */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
           ©swapLearn. All rights reserved.
@@ -133,6 +137,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f4f0',
   },
+
 
   searchContainer: {
     padding: 5,
@@ -152,6 +157,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
   },
 
+  /* HERO */
   hero: {
     alignItems: 'center',
     paddingVertical: 60,
@@ -207,6 +213,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
+  /* FEATURES */
   features: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -234,6 +241,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  /* LESSONS */
   sectionTitle: {
     color: '#151a3c',
     fontSize: 30,
