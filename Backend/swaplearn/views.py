@@ -1,18 +1,19 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import User, Skill, UserSkill, UserFullData, SkillRequest, ChatRoom, Message
+from .models import User, Skill, UserSkill, UserFullData, SkillRequest, ChatRoom, Message, UserProfile
 import json
 import hashlib
 import os
 from django.db.models import Q
 from django.db.models import Count
 print("RUNNING FROM:", os.getcwd())
-print("CORRECT VIEWS.PY RUNNING ")   
+print("CORRECT VIEWS.PY RUNNING ")    
 
 
 def home(request):
     return render(request, 'add.html')
+
 
 @csrf_exempt
 def register(request):
@@ -20,12 +21,21 @@ def register(request):
         raw_password = request.POST.get("password")
         hashed_password = hashlib.sha256(raw_password.encode()).hexdigest()
 
-        User.objects.create(
+        user = User.objects.create(
             full_name=request.POST.get("name"),
             username=request.POST.get("username"),
             email=request.POST.get("email"),
             password=hashed_password
         )
+
+        UserProfile.objects.create(
+            user=user,
+            username=user.username,
+            credit=10,
+            skills_learn_count=0,
+            skills_teach_count=0
+        )
+       
         return render(request, 'success.html')
 
     return JsonResponse({"error": "POST required"}, status=400)
@@ -45,11 +55,20 @@ def api_add_user(request):
             password=hashed_password
         )
 
+        UserProfile.objects.create(
+            user=user,
+            username=user.username,
+            credit=10,
+            skills_learn_count=0,
+            skills_teach_count=0
+        )
+
         return JsonResponse({"id": user.user_id})
 
     return JsonResponse({"error": "POST required"}, status=400)
 
 
+# ================= LOGIN =================
 @csrf_exempt
 def api_login(request):
     if request.method == "POST":
@@ -74,6 +93,7 @@ def api_login(request):
     return JsonResponse({"error": "POST only"}, status=400)
 
 
+# ================= REQUEST =================
 def api_get_users(request):
     users = User.objects.all()
 
@@ -126,6 +146,7 @@ def get_requests(request, user_id):
     ], safe=False)
 
 
+# ================= ACCEPT REQUEST =================
 @csrf_exempt
 def accept_request(request):
     if request.method == "POST":
@@ -157,11 +178,12 @@ def accept_request(request):
 
             print("ROOM CREATED:", room.id)
         else:
-            print(" ROOM EXISTS:", existing_room.id)
+            print("ROOM EXISTS:", existing_room.id)
 
         return JsonResponse({"message": "Accepted + chat ready"})
 
     return JsonResponse({"error": "POST only"}, status=400)
+
 
 def get_chats(request, user_id):
     try:
@@ -213,6 +235,7 @@ def get_messages(request, room_id):
         for m in msgs
     ], safe=False)
 
+# ================= SEND MESSAGE =================
 @csrf_exempt
 def send_message(request):
     if request.method == "POST":
@@ -221,7 +244,7 @@ def send_message(request):
         sender = User.objects.get(user_id=data.get("sender_id"))
         room = ChatRoom.objects.get(id=data.get("room_id"))
 
-        print("SENDING MESSAGE TO ROOM:", room.id)  
+        print("🔥 SENDING MESSAGE TO ROOM:", room.id)  # ✅ DEBUG
 
         Message.objects.create(
             sender=sender,
@@ -234,6 +257,7 @@ def send_message(request):
     return JsonResponse({"error": "POST only"}, status=400)
 
 
+# ================= SKILLS =================
 @csrf_exempt
 def save_user_skills(request):
     if request.method == "POST":
@@ -442,3 +466,79 @@ def get_calendar_slots(request):
     data = list(collection.find({"username": username}, {"_id": 0}))
 
     return JsonResponse(data, safe=False)
+
+from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import UserProfile
+
+@csrf_exempt
+def end_session(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        teacher_id = data.get("teacher_id")
+        learner_id = data.get("learner_id")
+
+        try:
+            with transaction.atomic():
+
+                teacher_profile = UserProfile.objects.get(
+                    user__user_id=teacher_id
+                )
+
+                learner_profile = UserProfile.objects.get(
+                    user__user_id=learner_id
+                )
+
+                if learner_profile.credit < 3:
+                    return JsonResponse({"error": "Not enough credits"}, status=400)
+
+                teacher_profile.credit += 2
+                learner_profile.credit -= 3
+
+                # Optional counters
+                teacher_profile.skills_teach_count += 1
+                learner_profile.skills_learn_count += 1
+
+                teacher_profile.save()
+                learner_profile.save()
+
+            return JsonResponse({
+                "message": "Credits updated",
+                "teacher_credit": teacher_profile.credit,
+                "learner_credit": learner_profile.credit,
+                "teacher_taught_count": teacher_profile.skills_teach_count,
+                "learner_learned_count": learner_profile.skills_learn_count
+            })
+
+        except UserProfile.DoesNotExist:
+            return JsonResponse({"error": "Profile not found"}, status=404)
+        
+def get_profile(request, user_id):
+
+    try:
+
+        profile = UserProfile.objects.get(
+            user__user_id=user_id
+        )
+
+        return JsonResponse({
+
+            "username": profile.username,
+
+            "credit": profile.credit,
+
+            "skills_learn_count":
+                profile.skills_learn_count,
+
+            "skills_teach_count":
+                profile.skills_teach_count
+        })
+
+    except UserProfile.DoesNotExist:
+
+        return JsonResponse({
+            "error": "Profile not found"
+        }, status=404)
