@@ -25,6 +25,7 @@ export default function Index() {
 
 
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedName, setSelectedName] = useState<string>("");
 
   console.log("CURRENT SCREEN:", screen);
@@ -211,6 +212,8 @@ export default function Index() {
         roomId={selectedRoom}
         user={user}
         name={selectedName}
+        otherUserId={selectedUserId}  
+        role={"learner"}             
         goBack={() => setScreen('messages')}
       />
     );
