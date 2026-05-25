@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   FlatList,
   Linking,
+  Alert
 } from 'react-native';
 
-export default function ChatScreen({ roomId, user, name, goBack }) {
+export default function ChatScreen({ roomId, user, name, goBack, otherUserId, role }) {
 
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -65,11 +66,49 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
     }
   };
 
-  // 🎥 VIDEO CALL FUNCTION
   const startVideoCall = () => {
     const meetingRoom = `swaplearn_${roomId}`;
     const url = `https://meet.jit.si/${meetingRoom}`;
     Linking.openURL(url);
+  };
+
+  const endSession = async () => {
+    try {
+      let teacher_id, learner_id;
+
+      if (role === "teacher") {
+        teacher_id = user.user_id;
+        learner_id = otherUserId;
+      } else {
+        teacher_id = otherUserId;
+        learner_id = user.user_id;
+      }
+
+      const res = await fetch("http://127.0.0.1:8000/end_session/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          teacher_id: teacher_id,
+          learner_id: learner_id,
+        }),
+      });
+
+      const data = await res.json();
+      console.log("Credits Updated:", data);
+
+      Alert.alert("Session Ended", "Credits updated successfully");
+
+    } catch (err) {
+      console.log("Error:", err);
+    }
+  };
+
+
+  const handleBack = async () => {
+    await endSession();  // 
+    goBack();
   };
 
   const renderMessage = ({ item }) => {
@@ -113,7 +152,7 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
       >
 
         <View>
-          <TouchableOpacity onPress={goBack}>
+          <TouchableOpacity onPress={handleBack}>
             <Text style={{ color: "#fff" }}>← Back</Text>
           </TouchableOpacity>
 
@@ -150,7 +189,7 @@ export default function ChatScreen({ roomId, user, name, goBack }) {
         }}
       />
 
-      {/* MESSAGE BOX */}
+      {/* MESSAGE INPUT */}
       <View style={{ flexDirection: "row", padding: 10 }}>
         <TextInput
           value={text}
