@@ -1,0 +1,6 @@
+Django==4.1.13
+gunicorn
+whitenoise
+pymongo
+dnspython
+python-decouple
