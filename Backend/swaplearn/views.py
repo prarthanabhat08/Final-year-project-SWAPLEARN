@@ -244,15 +244,15 @@ def send_message(request):
         sender = User.objects.get(user_id=data.get("sender_id"))
         room = ChatRoom.objects.get(id=data.get("room_id"))
 
-        print("🔥 SENDING MESSAGE TO ROOM:", room.id)  # ✅ DEBUG
-
         Message.objects.create(
             sender=sender,
             room=room,
-            text=data.get("text")
+            text=data.get("text"),
+            type=data.get("type", "text"),
+            status="pending"
         )
 
-        return JsonResponse({"message": "Message sent"})
+        return JsonResponse({"message": "sent"})
 
     return JsonResponse({"error": "POST only"}, status=400)
 
@@ -542,3 +542,25 @@ def get_profile(request, user_id):
         return JsonResponse({
             "error": "Profile not found"
         }, status=404)
+    
+@csrf_exempt
+def accept_call(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        msg = Message.objects.get(message_id=data["message_id"])
+        msg.status = "accepted"
+        msg.save()
+
+        return JsonResponse({"message": "call accepted"})
+    
+@csrf_exempt
+def reject_call(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        msg = Message.objects.get(message_id=data["message_id"])
+        msg.status = "rejected"
+        msg.save()
+
+        return JsonResponse({"message": "call rejected"})
