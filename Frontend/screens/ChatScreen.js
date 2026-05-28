@@ -13,16 +13,28 @@ export default function ChatScreen({ roomId, user, name, goBack, otherUserId, ro
 
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [incomingCall, setIncomingCall] = useState(null);
 
-  const loadMessages = async () => {
-    try {
-      const res = await fetch(`http://127.0.0.1:8000/api/messages/${roomId}/`);
-      const data = await res.json();
-      setMessages(data);
-    } catch (err) {
-      console.log(err);
+const loadMessages = async () => {
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/api/messages/${roomId}/`);
+    const data = await res.json();
+
+    setMessages(data);
+
+    // 🔥 CHECK FOR INCOMING CALL HERE
+    const call = data.find(
+      m => m.type === "call_request" && m.status === "pending"
+    );
+
+    if (call && call.sender !== user.user_id) {
+      setIncomingCall(call);
     }
-  };
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   useEffect(() => {
     if (!roomId) return;
@@ -66,11 +78,24 @@ export default function ChatScreen({ roomId, user, name, goBack, otherUserId, ro
     }
   };
 
-  const startVideoCall = () => {
-    const meetingRoom = `swaplearn_${roomId}`;
-    const url = `https://meet.jit.si/${meetingRoom}`;
-    Linking.openURL(url);
-  };
+const startVideoCall = async () => {
+  const meetingRoom = `swaplearn_${roomId}`;
+  const url = `https://meet.jit.si/${meetingRoom}`;
+
+  await fetch("http://127.0.0.1:8000/api/send-message/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sender_id: user.user_id,
+      room_id: roomId,
+      text: url,
+      type: "call_request"
+    })
+  });
+};
+
+    // optional: open call after sending
+  
 
   const endSession = async () => {
     try {
@@ -111,31 +136,36 @@ export default function ChatScreen({ roomId, user, name, goBack, otherUserId, ro
     goBack();
   };
 
-  const renderMessage = ({ item }) => {
-    const isMe = String(item.sender) === String(user.user_id);
+ const renderMessage = ({ item }) => {
+  const isMe = String(item.sender) === String(user.user_id);
 
-    return (
-      <View
-        style={{
-          alignItems: isMe ? "flex-end" : "flex-start",
-          marginVertical: 5,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: isMe ? "#4CAF50" : "#ddd",
-            padding: 10,
-            borderRadius: 10,
-            maxWidth: "70%",
-          }}
-        >
+  return (
+    <View style={{ alignItems: isMe ? "flex-end" : "flex-start", marginVertical: 5 }}>
+      <View style={{
+        backgroundColor: isMe ? "#4CAF50" : "#ddd",
+        padding: 10,
+        borderRadius: 10,
+        maxWidth: "70%"
+      }}>
+
+        {/* 🔥 THIS IS THE IMPORTANT CHANGE */}
+       {item.type === "video_call" || item.text?.includes("meet.jit.si") ? (
+          <TouchableOpacity onPress={() => Linking.openURL(item.text)}>
+            <Text style={{ color: "blue", fontWeight: "bold" }}>
+              📹 Join Video Call
+            </Text>
+          </TouchableOpacity>
+        ) : (
           <Text style={{ color: isMe ? "#fff" : "#000" }}>
             {item.text}
           </Text>
-        </View>
+        )}
+
       </View>
-    );
-  };
+    </View>
+  );
+};
+        
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f0f4f0" }}>
