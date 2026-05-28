@@ -69,6 +69,11 @@ class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, null=True, blank=True)
     text = models.TextField()
+    type = models.CharField(max_length=20, default="text")
+
+    # 🔥 ADD THIS
+    status = models.CharField(max_length=20, default="sent")
+
     timestamp = models.DateTimeField(auto_now_add=True)
 
 # REVIEW
